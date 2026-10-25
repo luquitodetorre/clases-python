@@ -1,23 +1,27 @@
 # Example file showing a basic pygame "game loop"
 import pygame
-
+import time
 # pygame setup
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
-pos = [1280//2,720//2]
-vell =[5,5]
-radio = 30
-plat_x = 1280//2
-plat_largo = 300
-izq = False
-der = False
-plat_vell = 20
+cont:int = 0
+
+bola = pygame.Rect(1280//2,720//2,60,60)
+plataforma = pygame.Rect(1280//2,screen.size[1]-100,300,30)
+bola_vell =[5,5]
+plat_vell = 10
+
+izq:bool = False
+der:bool = False
+
+font = pygame.font.Font(None,72)
+puntos = font.render(f"score: {cont} ", True, "black")
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
-
+    print(bola_vell)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -38,31 +42,38 @@ while running:
     screen.fill("white")
 
     # RENDER YOUR GAME HERE
-
-    pos[0]+=vell[0]
-    pos[1]+=vell[1]
-
     if izq:
-        plat_x -= plat_vell
+        plataforma.x -= plat_vell
     if der:
-        plat_x += plat_vell
+        plataforma.x += plat_vell
 
-    if pos[0] <=radio or pos[0] >=screen.size[0]-radio:
-        vell[0] *= -1
-    if pos[1] <= radio or pos[1] >= screen.size[1]-radio:
-        vell[1] *= -1
+    bola.x+=bola_vell[0]
+    bola.y+=bola_vell[1]
 
-    if plat_x <= 0:
-        plat_x = 0
-    if plat_x >= screen.size[0]-plat_largo:
-        plat_x = screen.size[0]-plat_largo
+    if plataforma.colliderect(bola):
+        bola_vell[1] *= -1
+        cont += 1
+        puntos = font.render(f"score: {cont} ", True, "black")
 
 
-    pygame.draw.line(screen,"red",[plat_x,screen.size[1]-50],[plat_largo+plat_x,screen.size[1]-50],30)
-    pygame.draw.circle(screen,"blue",pos,radio )
+    if bola.x <= 0 or bola.x >=screen.size[0] -bola.width:
+        bola_vell[0] *= -1
+    if bola.y <= 0 or bola.y >= screen.size[1] -bola.width:
+        bola_vell[1] *= -1
+
+    if plataforma.x <= 0:
+        plataforma.x = 0
+    if plataforma.x >= screen.size[0]-plataforma.width:
+        plataforma.x = screen.size[0]-plataforma.width
+
+
+    pygame.draw.rect(screen,"blue",plataforma)
+    pygame.draw.rect(screen,"red",bola)
+    screen.blit(puntos)
+
     # flip() the display to put your work on screen
     pygame.display.flip()
 
-    clock.tick(60)  # limits FPS to 60
+    clock.tick(80)  # limits FPS to 80
 
 pygame.quit()
